@@ -1,0 +1,3 @@
+[submodule "extern/webauthnwin"]
+	path = extern/webauthnwin
+	url = https://github.com/microsoft/webauthn.git

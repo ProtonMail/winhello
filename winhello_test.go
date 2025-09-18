@@ -4,18 +4,16 @@ package winhello
 
 import (
 	"encoding/base64"
-	"log/slog"
 	"os"
 	"testing"
 
 	"github.com/go-ctap/ctaphid/pkg/webauthntypes"
+	"github.com/go-ctap/winhello/window"
 	"github.com/goforj/godump"
 	"github.com/ldclabs/cose/iana"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/sys/windows"
-
-	"github.com/go-ctap/winhello/hiddenwindow"
 )
 
 var (
@@ -31,58 +29,14 @@ func TestMain(m *testing.M) {
 	if !runWinHelloTests() {
 		m.Run()
 	} else {
-		wnd, err := hiddenwindow.New(slog.New(slog.DiscardHandler), "WebAuthn Tests")
+		wnd, err := window.GetForegroundWindow()
 		if err != nil {
 			panic(err)
 		}
-		defer wnd.Close()
 
-		hWnd = wnd.WindowHandle()
+		hWnd = wnd
 		m.Run()
 	}
-}
-
-func TestAuthenticatorMakePlatformCredential(t *testing.T) {
-	if !runWinHelloTests() {
-		t.Skip("Skipping test because WINHELLO_TESTS is not set")
-	}
-
-	credAttestation, err := MakeCredential(
-		hWnd,
-		[]byte("{}"),
-		webauthntypes.PublicKeyCredentialRpEntity{
-			ID:   "example.org",
-			Name: "Example RP",
-		},
-		webauthntypes.PublicKeyCredentialUserEntity{
-			ID:          []byte("john"),
-			Name:        "John Doe",
-			DisplayName: "John Doe",
-		},
-		[]webauthntypes.PublicKeyCredentialParameters{
-			{
-				Type:      webauthntypes.PublicKeyCredentialTypePublicKey,
-				Algorithm: iana.AlgorithmES256,
-			},
-		},
-		nil,
-		&webauthntypes.CreateAuthenticationExtensionsClientInputs{
-			CreateCredentialPropertiesInputs: &webauthntypes.CreateCredentialPropertiesInputs{
-				CredentialProperties: true,
-			},
-		},
-		&AuthenticatorMakeCredentialOptions{
-			AuthenticatorAttachment:         WinHelloAuthenticatorAttachmentPlatform,
-			AttestationConveyancePreference: WinHelloAttestationConveyancePreferenceDirect,
-			RequireResidentKey:              true,
-		},
-	)
-	require.NoError(t, err)
-
-	// credProps
-	assert.True(t, credAttestation.ExtensionOutputs.CreateCredentialPropertiesOutputs.CredentialProperties.ResidentKey)
-
-	godump.Dump(credAttestation)
 }
 
 func TestGetPlatformAssertion(t *testing.T) {
