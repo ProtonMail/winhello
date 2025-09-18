@@ -14,7 +14,6 @@ type currentVersion struct {
 	commonAttestation                  uint32
 	credentialAttestation              uint32
 	assertion                          uint32
-	authenticatorDetails               uint32
 }
 
 func availableVersions(ver uint32) *currentVersion {
@@ -25,6 +24,7 @@ func availableVersions(ver uint32) *currentVersion {
 		coseCredentialParameter: 1,
 		credential:              1,
 		credentialEx:            1,
+		getCredentialsOptions:   1,
 		commonAttestation:       1,
 
 		authenticatorMakeCredentialOptions: 3,
@@ -45,7 +45,6 @@ func availableVersions(ver uint32) *currentVersion {
 			v.authenticatorMakeCredentialOptions++
 			v.authenticatorGetAssertionOptions++
 			v.assertion++
-			v.getCredentialsOptions++
 			v.credentialDetails++
 		}, // 4
 		func(v *currentVersion) {
@@ -70,11 +69,9 @@ func availableVersions(ver uint32) *currentVersion {
 		}, // 8
 		func(v *currentVersion) {
 			v.authenticatorMakeCredentialOptions++
-			v.authenticatorGetAssertionOptions++
-			v.assertion++
 			v.credentialDetails++
 			v.credentialAttestation++
-			v.authenticatorDetails++
+			v.authenticatorGetAssertionOptions++
 		},
 	}
 
