@@ -1159,6 +1159,7 @@ typedef struct _WEBAUTHN_CREDENTIAL_ATTESTATION {
 typedef const WEBAUTHN_CREDENTIAL_ATTESTATION *PCWEBAUTHN_CREDENTIAL_ATTESTATION;
 
 
+
 //+------------------------------------------------------------------------------------------
 // authenticatorGetAssertion output.
 //-------------------------------------------------------------------------------------------
@@ -1283,6 +1284,7 @@ WebAuthNAuthenticatorMakeCredential(
     _In_        PCWEBAUTHN_CLIENT_DATA                              pWebAuthNClientData,
     _In_opt_    PCWEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS    pWebAuthNMakeCredentialOptions,
     _Outptr_result_maybenull_ PWEBAUTHN_CREDENTIAL_ATTESTATION      *ppWebAuthNCredentialAttestation);
+
 
 
 HRESULT
