@@ -14,6 +14,7 @@ type currentVersion struct {
 	commonAttestation                  uint32
 	credentialAttestation              uint32
 	assertion                          uint32
+	authenticatorDetails               uint32
 }
 
 func availableVersions(ver uint32) *currentVersion {
