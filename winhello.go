@@ -17,24 +17,62 @@ import (
 )
 
 var (
-	modWebAuthn                                               = windows.NewLazyDLL("webauthn.dll")
-	procWebAuthNGetApiVersionNumber                           = modWebAuthn.NewProc("WebAuthNGetApiVersionNumber")
-	procWebAuthNIsUserVerifyingPlatformAuthenticatorAvailable = modWebAuthn.NewProc("WebAuthNIsUserVerifyingPlatformAuthenticatorAvailable")
-	procWebAuthNAuthenticatorMakeCredential                   = modWebAuthn.NewProc("WebAuthNAuthenticatorMakeCredential")
-	procWebAuthNAuthenticatorGetAssertion                     = modWebAuthn.NewProc("WebAuthNAuthenticatorGetAssertion")
-	procWebAuthNFreeCredentialAttestation                     = modWebAuthn.NewProc("WebAuthNFreeCredentialAttestation")
-	procWebAuthNFreeAssertion                                 = modWebAuthn.NewProc("WebAuthNFreeAssertion")
-	procWebAuthNGetCancellationId                             = modWebAuthn.NewProc("WebAuthNGetCancellationId")
-	procWebAuthNCancelCurrentOperation                        = modWebAuthn.NewProc("WebAuthNCancelCurrentOperation")
-	procWebAuthNGetPlatformCredentialList                     = modWebAuthn.NewProc("WebAuthNGetPlatformCredentialList")
-	procWebAuthNFreePlatformCredentialList                    = modWebAuthn.NewProc("WebAuthNFreePlatformCredentialList")
-	procWebAuthNDeletePlatformCredential                      = modWebAuthn.NewProc("WebAuthNDeletePlatformCredential")
-	procWebAuthNGetAuthenticatorList                          = modWebAuthn.NewProc("WebAuthNGetAuthenticatorList")
-	procWebAuthNFreeAuthenticatorList                         = modWebAuthn.NewProc("WebAuthNFreeAuthenticatorList")
-	procWebAuthNGetErrorName                                  = modWebAuthn.NewProc("WebAuthNGetErrorName")
-	procWebAuthNGetW3CExceptionDOMError                       = modWebAuthn.NewProc("WebAuthNGetW3CExceptionDOMError")
-	currVer                                                   = availableVersions(APIVersionNumber())
+	ErrWindowsVersionNotSupported = errors.New("windows version not supported, requires Windows 10 1903 or later")
 )
+
+var (
+	modWebAuthn                                               *windows.LazyDLL
+	procWebAuthNGetApiVersionNumber                           *windows.LazyProc
+	procWebAuthNIsUserVerifyingPlatformAuthenticatorAvailable *windows.LazyProc
+	procWebAuthNAuthenticatorMakeCredential                   *windows.LazyProc
+	procWebAuthNAuthenticatorGetAssertion                     *windows.LazyProc
+	procWebAuthNFreeCredentialAttestation                     *windows.LazyProc
+	procWebAuthNFreeAssertion                                 *windows.LazyProc
+	procWebAuthNGetCancellationId                             *windows.LazyProc
+	procWebAuthNCancelCurrentOperation                        *windows.LazyProc
+	procWebAuthNGetPlatformCredentialList                     *windows.LazyProc
+	procWebAuthNFreePlatformCredentialList                    *windows.LazyProc
+	procWebAuthNDeletePlatformCredential                      *windows.LazyProc
+	procWebAuthNGetAuthenticatorList                          *windows.LazyProc
+	procWebAuthNFreeAuthenticatorList                         *windows.LazyProc
+	procWebAuthNGetErrorName                                  *windows.LazyProc
+	procWebAuthNGetW3CExceptionDOMError                       *windows.LazyProc
+	currVer                                                   *currentVersion
+	InitError                                                 error
+)
+
+func init() {
+	modWebAuthn = windows.NewLazyDLL("webauthn.dll")
+
+	if err := modWebAuthn.Load(); err != nil {
+		InitError = ErrWindowsVersionNotSupported
+		return
+	}
+
+	procWebAuthNGetApiVersionNumber = modWebAuthn.NewProc("WebAuthNGetApiVersionNumber")
+	procWebAuthNIsUserVerifyingPlatformAuthenticatorAvailable = modWebAuthn.NewProc("WebAuthNIsUserVerifyingPlatformAuthenticatorAvailable")
+	procWebAuthNAuthenticatorMakeCredential = modWebAuthn.NewProc("WebAuthNAuthenticatorMakeCredential")
+	procWebAuthNAuthenticatorGetAssertion = modWebAuthn.NewProc("WebAuthNAuthenticatorGetAssertion")
+	procWebAuthNFreeCredentialAttestation = modWebAuthn.NewProc("WebAuthNFreeCredentialAttestation")
+	procWebAuthNFreeAssertion = modWebAuthn.NewProc("WebAuthNFreeAssertion")
+	procWebAuthNGetCancellationId = modWebAuthn.NewProc("WebAuthNGetCancellationId")
+	procWebAuthNCancelCurrentOperation = modWebAuthn.NewProc("WebAuthNCancelCurrentOperation")
+	procWebAuthNGetPlatformCredentialList = modWebAuthn.NewProc("WebAuthNGetPlatformCredentialList")
+	procWebAuthNFreePlatformCredentialList = modWebAuthn.NewProc("WebAuthNFreePlatformCredentialList")
+	procWebAuthNDeletePlatformCredential = modWebAuthn.NewProc("WebAuthNDeletePlatformCredential")
+	procWebAuthNGetAuthenticatorList = modWebAuthn.NewProc("WebAuthNGetAuthenticatorList")
+	procWebAuthNFreeAuthenticatorList = modWebAuthn.NewProc("WebAuthNFreeAuthenticatorList")
+	procWebAuthNGetErrorName = modWebAuthn.NewProc("WebAuthNGetErrorName")
+	procWebAuthNGetW3CExceptionDOMError = modWebAuthn.NewProc("WebAuthNGetW3CExceptionDOMError")
+
+	apiVersion := APIVersionNumber()
+	if apiVersion == 0 {
+		InitError = ErrWindowsVersionNotSupported
+		return
+	}
+
+	currVer = availableVersions(apiVersion)
+}
 
 type WebAuthnCredentialDetails struct {
 	CredentialID      []byte
@@ -284,6 +322,10 @@ func GetAssertion(
 }
 
 func APIVersionNumber() uint32 {
+	if procWebAuthNGetApiVersionNumber.Find() != nil {
+		return 0
+	}
+
 	r1, _, _ := procWebAuthNGetApiVersionNumber.Call()
 	return uint32(r1)
 }
