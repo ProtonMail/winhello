@@ -261,6 +261,23 @@ type (
 		WEncodedTunnelServerDomain	uint16
 		Pad_cgo_0			[6]byte
 	}
+	_WEBAUTHN_AUTHENTICATOR_DETAILS_OPTIONS	struct {
+		DwVersion uint32
+	}
+	_WEBAUTHN_AUTHENTICATOR_DETAILS	struct {
+		DwVersion		uint32
+		CbAuthenticatorId	uint32
+		PbAuthenticatorId	*uint8
+		PwszAuthenticatorName	*uint16
+		CbAuthenticatorLogo	uint32
+		PbAuthenticatorLogo	*uint8
+		BLocked			int32
+		Pad_cgo_0		[4]byte
+	}
+	_WEBAUTHN_AUTHENTICATOR_DETAILS_LIST	struct {
+		CAuthenticatorDetails	uint32
+		PpAuthenticatorDetails	**_WEBAUTHN_AUTHENTICATOR_DETAILS
+	}
 )
 
 func int32ToBool(i int32) bool {
