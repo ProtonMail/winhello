@@ -4,12 +4,10 @@
 package winhello
 
 import (
-	"bytes"
 	"encoding/base64"
 	"errors"
 	"fmt"
 	"log/slog"
-	"slices"
 	"unsafe"
 
 	"github.com/go-ctap/ctaphid/pkg/webauthntypes"
