@@ -1,4 +1,4 @@
-module github.com/go-ctap/winhello
+module github.com/ProtonMail/winhello
 
 go 1.24.4
 
